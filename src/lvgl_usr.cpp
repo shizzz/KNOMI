@@ -121,7 +121,8 @@ void lvgl_ui_task(void * parameter) {
 
         if (status == WIFI_STATUS_CONNECTED) {
 
-            lv_loop_popup_screen();
+            // remove popup to use only gifs
+            // lv_loop_popup_screen();
             lv_loop_set_temp_screen();
 
             if (!moonraker.unconnected && !moonraker.unready) {
@@ -129,6 +130,8 @@ void lvgl_ui_task(void * parameter) {
                     lv_loop_moonraker_change_screen();
                 }
                 lv_loop_moonraker_change_screen_value();
+            } else {
+                lv_loop_moonraker_change_screen();
             }
         }
 

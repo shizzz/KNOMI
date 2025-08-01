@@ -12,6 +12,7 @@ typedef enum {
     LV_MOONRAKER_STATE_NOZZLE_CLEANING,
     LV_MOONRAKER_STATE_BED_HEATING,
     LV_MOONRAKER_STATE_PRINTING,
+    LV_MOONRAKER_STATE_FAILED,
     LV_SCREEN_STATE_INIT,
     LV_SCREEN_STATE_IDLE,
     LV_SCREEN_HEATED,
@@ -96,6 +97,14 @@ void lv_loop_moonraker_change_screen(void) {
     //         return;
     //     }
     // }
+    if (moonraker.unconnected) {
+        lv_goto_busy_screen(ui_ScreenMainGif, LV_MOONRAKER_STATE_FAILED, &gif_sharingan);
+        return;
+    }
+    if (moonraker.unready) {
+        lv_goto_busy_screen(ui_ScreenMainGif, LV_MOONRAKER_STATE_FAILED, &gif_sharingan);
+        return;
+    }
     if (moonraker.data.homing) {
         lv_goto_busy_screen(ui_ScreenMainGif, LV_MOONRAKER_STATE_HOMING, &gif_homing);
         return;

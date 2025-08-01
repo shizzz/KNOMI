@@ -13,6 +13,7 @@ LV_IMG_DECLARE(gif_homing);
 LV_IMG_DECLARE(gif_probing);
 LV_IMG_DECLARE(gif_nozzle_cleaning);
 LV_IMG_DECLARE(gif_sharingan);
+LV_IMG_DECLARE(gif_evil);
 LV_IMG_DECLARE(gif_qgling);
 LV_IMG_DECLARE(gif_heated);
 LV_IMG_DECLARE(gif_print);
