@@ -9,6 +9,7 @@ typedef enum {
     LV_MOONRAKER_STATE_PROBING,
     LV_MOONRAKER_STATE_QGLING,
     LV_MOONRAKER_STATE_NOZZLE_HEATING,
+    LV_MOONRAKER_STATE_NOZZLE_CLEANING,
     LV_MOONRAKER_STATE_BED_HEATING,
     LV_MOONRAKER_STATE_PRINTING,
     LV_SCREEN_STATE_INIT,
@@ -101,6 +102,10 @@ void lv_loop_moonraker_change_screen(void) {
     }
     if (moonraker.data.probing) {
         lv_goto_busy_screen(ui_ScreenMainGif, LV_MOONRAKER_STATE_PROBING, &gif_probing);
+        return;
+    }
+    if (moonraker.data.cleaning_nozzle) {
+        lv_goto_busy_screen(ui_ScreenMainGif, LV_MOONRAKER_STATE_NOZZLE_CLEANING, &gif_nozzle_cleaning);
         return;
     }
     if (moonraker.data.qgling) {

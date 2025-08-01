@@ -27,6 +27,7 @@ typedef struct {
     bool probing;
     bool qgling;
     bool heating_nozzle;
+    bool cleaning_nozzle;
     bool heating_bed;
 } moonraker_data_t;
 
