@@ -91,52 +91,78 @@ bool MOONRAKER::post_gcode_to_queue(String gcode) {
 
 void MOONRAKER::get_printer_ready(void) {
     String webhooks = send_request("GET", "/printer/objects/query?webhooks");
-    if (!webhooks.isEmpty()) {
-        DynamicJsonDocument json_parse(webhooks.length() * 2);
-        deserializeJson(json_parse, webhooks);
-        String state = json_parse["result"]["status"]["webhooks"]["state"].as<String>();
-        unready = (state == "ready") ? false : true;
-#ifdef MOONRAKER_DEBUG
-        Serial.print("unready: ");
-        Serial.println(unready);
-#endif
-    } else {
+
+    if (webhooks.isEmpty()) {
         unready = true;
         Serial.println("Empty: moonraker: get_printer_ready");
+        return;
     }
+
+    DynamicJsonDocument json_parse(webhooks.length() * 2);
+    DeserializationError error = deserializeJson(json_parse, webhooks);
+
+    if (error) {
+        unready = true;
+        Serial.print("JSON parse error in get_printer_ready: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    JsonVariant state_val = json_parse["result"]["status"]["webhooks"]["state"];
+    if (!state_val.isNull()) {
+        String state = state_val.as<String>();
+        unready = (state != "ready");
+    } else {
+        unready = true;
+        Serial.println("Missing 'state' in webhooks object");
+    }
+
+#ifdef MOONRAKER_DEBUG
+    Serial.print("unready: ");
+    Serial.println(unready);
+#endif
 }
 
 void MOONRAKER::get_printer_info(void) {
     String printer_info = send_request("GET", "/api/printer");
-    if (!printer_info.isEmpty()) {
-        DynamicJsonDocument json_parse(printer_info.length() * 2);
-        deserializeJson(json_parse, printer_info);
-        data.pause = json_parse["state"]["flags"]["pausing"].as<bool>(); // pausing
-        data.pause |= json_parse["state"]["flags"]["paused"].as<bool>(); // paused
-        data.printing = json_parse["state"]["flags"]["printing"].as<bool>(); // printing
-        data.printing |= json_parse["state"]["flags"]["cancelling"].as<bool>(); // cancelling
-        data.printing |= data.pause; // pause
-        data.bed_actual = int16_t(json_parse["temperature"]["bed"]["actual"].as<double>() + 0.5f);
-        data.bed_target = int16_t(json_parse["temperature"]["bed"]["target"].as<double>() + 0.5f);
-        data.nozzle_actual = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["actual"].as<double>() + 0.5f);
-        data.nozzle_target = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["target"].as<double>() + 0.5f);
-#ifdef MOONRAKER_DEBUG
-        Serial.print("unoperational: ");
-        Serial.println(unoperational);
-        Serial.print("printing: ");
-        Serial.println(data.printing);
-        Serial.print("bed_actual: ");
-        Serial.println(data.bed_actual);
-        Serial.print("bed_target: ");
-        Serial.println(data.bed_target);
-        Serial.print("nozzle_actual: ");
-        Serial.println(data.nozzle_actual);
-        Serial.print("nozzle_target: ");
-        Serial.println(data.nozzle_target);
-#endif
-    } else {
+    
+    if (printer_info.isEmpty()) {
         Serial.println("Empty: moonraker: get_printer_info");
+        return;
     }
+    
+    DynamicJsonDocument json_parse(printer_info.length() * 2);
+    DeserializationError error = deserializeJson(json_parse, printer_info);
+
+    if (error) {
+        Serial.print("JSON parse error: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    data.pause = json_parse["state"]["flags"]["pausing"].as<bool>(); // pausing
+    data.pause |= json_parse["state"]["flags"]["paused"].as<bool>(); // paused
+    data.printing = json_parse["state"]["flags"]["printing"].as<bool>(); // printing
+    data.printing |= json_parse["state"]["flags"]["cancelling"].as<bool>(); // cancelling
+    data.printing |= data.pause; // pause
+    data.bed_actual = int16_t(json_parse["temperature"]["bed"]["actual"].as<double>() + 0.5f);
+    data.bed_target = int16_t(json_parse["temperature"]["bed"]["target"].as<double>() + 0.5f);
+    data.nozzle_actual = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["actual"].as<double>() + 0.5f);
+    data.nozzle_target = int16_t(json_parse["temperature"][knomi_config.moonraker_tool]["target"].as<double>() + 0.5f);
+#ifdef MOONRAKER_DEBUG
+    Serial.print("unoperational: ");
+    Serial.println(unoperational);
+    Serial.print("printing: ");
+    Serial.println(data.printing);
+    Serial.print("bed_actual: ");
+    Serial.println(data.bed_actual);
+    Serial.print("bed_target: ");
+    Serial.println(data.bed_target);
+    Serial.print("nozzle_actual: ");
+    Serial.println(data.nozzle_actual);
+    Serial.print("nozzle_target: ");
+    Serial.println(data.nozzle_target);
+#endif
 }
 
 // only return gcode file name except path
@@ -154,22 +180,31 @@ const char * path_only_gcode(const char * path)
 
 void MOONRAKER::get_progress(void) {
     String display_status = send_request("GET", "/printer/objects/query?virtual_sdcard");
-    if (!display_status.isEmpty()) {
-        DynamicJsonDocument json_parse(display_status.length() * 2);
-        deserializeJson(json_parse, display_status);
-        data.progress = (uint8_t)(json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<double>() * 100 + 0.5f);
-        String path = json_parse["result"]["status"]["virtual_sdcard"]["file_path"].as<String>();
-        strlcpy(data.file_path, path_only_gcode(path.c_str()), sizeof(data.file_path) - 1);
-        data.file_path[sizeof(data.file_path) - 1] = 0;
-#ifdef MOONRAKER_DEBUG
-        Serial.print("progress: ");
-        Serial.println(data.progress);
-        Serial.print("path: ");
-        Serial.println(data.file_path);
-#endif
-    } else {
+    
+    if (display_status.isEmpty()) {
         Serial.println("Empty: moonraker: get_progress");
+        return;
     }
+    
+    DynamicJsonDocument json_parse(display_status.length() * 2);
+    DeserializationError error = deserializeJson(json_parse, display_status);
+
+    if (error) {
+        Serial.print("JSON parse error: ");
+        Serial.println(error.c_str());
+        return;
+    }
+
+    data.progress = (uint8_t)(json_parse["result"]["status"]["virtual_sdcard"]["progress"].as<double>() * 100 + 0.5f);
+    String path = json_parse["result"]["status"]["virtual_sdcard"]["file_path"].as<String>();
+    strlcpy(data.file_path, path_only_gcode(path.c_str()), sizeof(data.file_path) - 1);
+    data.file_path[sizeof(data.file_path) - 1] = 0;
+#ifdef MOONRAKER_DEBUG
+    Serial.print("progress: ");
+    Serial.println(data.progress);
+    Serial.print("path: ");
+    Serial.println(data.file_path);
+#endif
 }
 
 void MOONRAKER::get_knomi_status(void) {
@@ -240,6 +275,7 @@ void moonraker_post_task(void * parameter) {
 }
 
 void moonraker_task(void * parameter) {
+    moonraker.data.printing = false;
 
     xTaskCreate(moonraker_post_task, "moonraker post",
         4096,  // Stack size (bytes)

@@ -19,6 +19,7 @@ knomi_config_t knomi_config;
 void webserver_setup(void);
 
 static uint16_t knomi_config_require = WEB_POST_NULL;
+static bool reconnect_sta = false;
 
 // ap info + sta info + wifi mode + wifi mode
 void knomi_config_require_change(uint16_t require) {
@@ -152,7 +153,7 @@ void wifi_scan_refresh(void) {
         }
     } else if (n == WIFI_SCAN_FAILED) {
         // scanDeleted or failed
-        // Serial.println("Scan faile!");
+        // Serial.println("Scan failed!");
     } else if (n == WIFI_SCAN_RUNNING) {
         Serial.println("Scaning...");
     }
@@ -265,7 +266,7 @@ restart:
     }
 
     // station connect
-    if (knomi_config_require & WEB_POST_WIFI_CONFIG_STA) {
+    if (knomi_config_require & WEB_POST_WIFI_CONFIG_STA || reconnect_sta) {
         knomi_config_require &= ~WEB_POST_WIFI_CONFIG_STA;
         Serial.println("knomi_config_require: STA");
         if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_APSTA) {
@@ -290,14 +291,17 @@ restart:
             if (wifi_status != WIFI_STATUS_CONNECTED) {
                 Serial.println("sta connect failed!!!");
                 wifi_status = WIFI_STATUS_ERROR;
+                // reconnect to STA
+                reconnect_sta = true;
                 // reset wifi mode to "ap"
                 // strlcpy(knomi_config.mode, "ap", sizeof(knomi_config.mode));
                 // knomi_config_require |= WEB_POST_WIFI_CONFIG_MODE;
-                goto restart;
+                // goto restart;
+            } else {
+                wifi_refresh_connected();
+                Serial.print("sta ip: ");
+                Serial.println(WiFi.localIP());   /*Printing IP address of Connected network*/
             }
-            wifi_refresh_connected();
-            Serial.print("sta ip: ");
-            Serial.println(WiFi.localIP());   /*Printing IP address of Connected network*/
         }
     }
 
@@ -331,7 +335,7 @@ void wifi_task(void * parameter) {
     WiFi.scanNetworks(true, false, true, 75U);
     webserver_setup();
 
-    while (1) {
+    for(;;) {
         wifi_scan_refresh();
         wifi_config_loop(false);
 
@@ -351,7 +355,7 @@ void wifi_task(void * parameter) {
         if (m == WIFI_MODE_AP || m == WIFI_MODE_APSTA) {
             dnsServer.processNextRequest();
         }
-
+        
         delay(100);
     }
 }
