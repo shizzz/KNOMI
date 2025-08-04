@@ -174,15 +174,29 @@ void MOONRAKER::get_progress(void) {
 
 void MOONRAKER::get_knomi_status(void) {
     String knomi_status = send_request("GET", "/printer/objects/query?gcode_macro%20_KNOMI_STATUS");
-    if (!knomi_status.isEmpty()) {
-        DynamicJsonDocument json_parse(knomi_status.length() * 2);
-        deserializeJson(json_parse, knomi_status);
-        data.homing = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"]["homing"].as<bool>();
-        data.probing = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"]["probing"].as<bool>();
-        data.qgling = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"]["qgling"].as<bool>();
-        data.heating_nozzle = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"]["heating_nozzle"].as<bool>();
-        data.cleaning_nozzle = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"]["cleaning_nozzle"].as<bool>();
-        data.heating_bed = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"]["heating_bed"].as<bool>();
+    
+    if (knomi_status.isEmpty()) {
+        Serial.println("Empty: moonraker: get_knomi_status");
+        return;
+    }
+    
+    DynamicJsonDocument json_parse(knomi_status.length() * 2);
+    DeserializationError error = deserializeJson(json_parse, knomi_status);
+
+    if (error) {
+        Serial.print("JSON parse error: ");
+        Serial.println(error.c_str());
+        return;
+    }
+    
+    JsonVariant macro_status = json_parse["result"]["status"]["gcode_macro _KNOMI_STATUS"];
+    if (!macro_status.isNull()) {
+        data.homing          = macro_status["homing"].as<bool>()          | false;
+        data.probing         = macro_status["probing"].as<bool>()         | false;
+        data.qgling          = macro_status["qgling"].as<bool>()          | false;
+        data.heating_nozzle  = macro_status["heating_nozzle"].as<bool>()  | false;
+        data.cleaning_nozzle = macro_status["cleaning_nozzle"].as<bool>() | false;
+        data.heating_bed     = macro_status["heating_bed"].as<bool>()     | false;
 #ifdef MOONRAKER_DEBUG
         Serial.print("homing: ");
         Serial.println(data.homing);

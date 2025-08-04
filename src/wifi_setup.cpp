@@ -91,9 +91,9 @@ void eeprom_init(void) {
         Serial.println(knomi_config.mode);
     } else {
         // init struct
-        knomi_config.sta_ssid[0] = 0,
-        knomi_config.sta_pwd[0] = 0,
         knomi_config.sta_auth = WIFI_AUTH_WPA2_PSK,
+        strlcpy(knomi_config.sta_ssid, STA_SSID, sizeof(knomi_config.sta_ssid));
+        strlcpy(knomi_config.sta_pwd, STA_PWD, sizeof(knomi_config.sta_pwd));
         strlcpy(knomi_config.ap_ssid, AP_SSID, sizeof(knomi_config.ap_ssid));
         strlcpy(knomi_config.ap_pwd, AP_PWD, sizeof(knomi_config.ap_pwd));
         strlcpy(knomi_config.hostname, HOSTNAME, sizeof(knomi_config.hostname));
@@ -291,8 +291,8 @@ restart:
                 Serial.println("sta connect failed!!!");
                 wifi_status = WIFI_STATUS_ERROR;
                 // reset wifi mode to "ap"
-                strlcpy(knomi_config.mode, "ap", sizeof(knomi_config.mode));
-                knomi_config_require |= WEB_POST_WIFI_CONFIG_MODE;
+                // strlcpy(knomi_config.mode, "ap", sizeof(knomi_config.mode));
+                // knomi_config_require |= WEB_POST_WIFI_CONFIG_MODE;
                 goto restart;
             }
             wifi_refresh_connected();
