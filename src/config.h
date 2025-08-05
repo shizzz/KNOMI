@@ -6,6 +6,8 @@
 #else
   #define STA_SSID "default_ssid"
   #define STA_PWD  "default_password"
+  #define MQTT_USER "MQTT_USER"
+  #define MQTT_PWD  "MQTT_PWD"
 #endif
 
 #define FW_VERSION "V1.0.2"
@@ -22,6 +24,12 @@
 #define AP_GATEWAY  IPAddress(192, 168, 20, 1) // gateway IP
 #define AP_SUBNET   IPAddress(255, 255, 255, 0) // subnet mask
 #define MODE WIFI_MODE_STA
+
+#define USE_MTTQT
+#define MQTT_CLIENT "Dummy13"
+#define MQTT_SERVER "192.168.137.28"
+#define MQTT_PORT 1883
+#define MQTT_TOPIC "dummy13"
 
 #define WIFI_STA_TIMEOUT 15000  // 15s
 

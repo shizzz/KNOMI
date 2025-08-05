@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "lvgl_hal.h"
 #include "pinout.h"
+#include "mqtt_client.h"
 
 #include "ui/ui.h"
 
@@ -68,6 +69,15 @@ void setup() {
         7,     // Task priority
         NULL   // Task handle
         );
+
+#ifdef USE_MTTQT
+    xTaskCreate(mqtt_task, "mttqt",
+        4096,  // Stack size (bytes)
+        NULL,  // Parameter to pass
+        7,     // Task priority
+        NULL   // Task handle
+        );
+#endif
 }
 
 void loop() {
