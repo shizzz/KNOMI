@@ -20,6 +20,10 @@ extern "C" {
 void ui_ScreenMainGif_screen_init(void);
 void ui_event_ScreenMainGif(lv_event_t * e);
 extern lv_obj_t * ui_ScreenMainGif;
+// SCREEN: ui_ScreenWifiConnectingGif
+void ui_ScreenWifiConnectingGif_screen_init(void);
+void ui_event_ScreenWifiConnectingGif(lv_event_t * e);
+extern lv_obj_t * ui_ScreenWifiConnectingGif;
 // SCREEN: ui_ScreenWelcome
 void ui_ScreenWelcome_screen_init(void);
 extern lv_obj_t * ui_ScreenWelcome;
@@ -260,6 +264,8 @@ LV_IMG_DECLARE(ui_img_backlight_png);    // assets\backlight.png
 LV_IMG_DECLARE(ui_img_btn_cancel_png);    // assets\btn_cancel.png
 LV_IMG_DECLARE(ui_img_popup_png);    // assets\popup.png
 LV_IMG_DECLARE(ui_img_test_png);    // assets\test.png
+
+LV_IMG_DECLARE(gif_standby);    // gif\gif_standby.c
 
 LV_FONT_DECLARE(ui_font_InterSeimiBold32);
 LV_FONT_DECLARE(ui_font_InterSemiBold14);

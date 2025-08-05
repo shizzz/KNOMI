@@ -13,20 +13,15 @@ static void lv_goto_wifi_screen(wifi_status_t state) {
     }
     lv_obj_t * target = NULL;
     switch (state) {
-        // case WIFI_STATUS_ERROR:
-        //     target = running_menu;
-        //     lv_gif_set_src(ui_img_main_gif, &gif_standby);
-        //     lv_obj_clear_flag(ui_ScreenMainGif, LV_OBJ_FLAG_CLICKABLE);
-        //     break;
         case WIFI_STATUS_ERROR:
+        case WIFI_STATUS_DISCONNECT:
+            target = ui_ScreenWifiConnectingGif;
+            break;
         case WIFI_STATUS_CONNECTING:
             target = ui_ScreenWIFIConnecting;
             break;
         case WIFI_STATUS_CONNECTED:
             target = running_menu;
-            break;
-        case WIFI_STATUS_DISCONNECT:
-            target = ui_ScreenWIFIDisconnect;
             break;
     }
     lv_wifi_status = state;

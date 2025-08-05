@@ -13,6 +13,11 @@ void ui_ScreenMainGif_screen_init(void);
 void ui_event_ScreenMainGif(lv_event_t * e);
 lv_obj_t * ui_ScreenMainGif;
 
+// SCREEN: ui_ScreenWifiConnectingGif
+void ui_ScreenWifiConnectingGif_screen_init(void);
+void ui_event_ScreenWifiConnectingGif(lv_event_t * e);
+lv_obj_t * ui_ScreenWifiConnectingGif;
+
 // SCREEN: ui_ScreenWelcome
 void ui_ScreenWelcome_screen_init(void);
 lv_obj_t * ui_ScreenWelcome;

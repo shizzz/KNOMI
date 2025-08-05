@@ -1,6 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#if __has_include("config_secrets.h")
+  #include "config_secrets.h"
+#else
+  #define STA_SSID "default_ssid"
+  #define STA_PWD  "default_password"
+#endif
+
 #define FW_VERSION "V1.0.2"
 
  // default 80 for http

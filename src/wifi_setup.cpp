@@ -266,7 +266,7 @@ restart:
     }
 
     // station connect
-    if (knomi_config_require & WEB_POST_WIFI_CONFIG_STA || reconnect_sta) {
+    if (knomi_config_require & WEB_POST_WIFI_CONFIG_STA || reconnect_sta || wifi_status == WIFI_STATUS_DISCONNECT) {
         knomi_config_require &= ~WEB_POST_WIFI_CONFIG_STA;
         Serial.println("knomi_config_require: STA");
         if (wifi_mode == WIFI_MODE_STA || wifi_mode == WIFI_MODE_APSTA) {
